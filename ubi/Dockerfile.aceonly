@@ -18,11 +18,11 @@ RUN go test -v ./cmd/runaceserver/
 RUN go test -v ./internal/...
 RUN go vet ./cmd/... ./internal/...
 
-ARG ACE_INSTALL=ace-11.0.0.8.tar.gz
+ARG ACE_INSTALL=ace-11.0.0.9.tar.gz
 WORKDIR /opt/ibm
 COPY deps/$ACE_INSTALL .
 RUN mkdir ace-11
-RUN tar -xzf $ACE_INSTALL --absolute-names --exclude ace-11.\*/tools --exclude ace-11.\*/server/bin/TADataCollector.sh --exclude ace-11.\*/server/transformationAdvisor/ta-plugin-ace.jar --strip-components 1 --directory /opt/ibm/ace-11
+RUN tar -xf $ACE_INSTALL --absolute-names --exclude ace-11.\*/tools --exclude ace-11.\*/server/bin/TADataCollector.sh --exclude ace-11.\*/server/transformationAdvisor/ta-plugin-ace.jar --strip-components 1 --directory /opt/ibm/ace-11
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
@@ -54,6 +54,8 @@ RUN mkdir /etc/ACEOpenTracing /opt/ACEOpenTracing /var/log/ACEOpenTracing && chm
 COPY deps/OpenTracing/library/* ./opt/ACEOpenTracing/
 COPY deps/OpenTracing/config/* ./etc/ACEOpenTracing/
 
+RUN microdnf install --nodocs openssl util-linux unzip python2 && microdnf clean all
+
 WORKDIR /opt/ibm
 
 RUN microdnf update && microdnf install findutils util-linux unzip python3 && microdnf clean all
@@ -73,7 +75,7 @@ RUN chmod u+x /usr/local/bin/install-kubectl.sh \
   && install-kubectl.sh
 
 # Create a user to run as, create the ace workdir, and chmod script files
-RUN /opt/ibm/ace-11/ace make registry global accept license silently \ 
+RUN /opt/ibm/ace-11/ace make registry global accept license silently \
     && useradd -u 1000 -d /home/aceuser -G mqbrkrs,wheel aceuser \
     && mkdir -p /var/mqsi \
     && mkdir -p /home/aceuser/initial-config \

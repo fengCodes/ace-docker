@@ -1,10 +1,14 @@
-FROM ace-only:latest
+FROM aceapp4-base:latest
 
 USER root
 COPY bars_aceonly /home/aceuser/bars
 RUN  chmod -R ugo+rwx /home/aceuser
 
 USER aceuser
+ENV ACE_SERVER_NAME=sampleAceOnly
+ENV ACE_SERVER_NAME=sampleAceOnly2
+ENV ACE_TRUSTSTORE_PASSWORD=truststorepwd
+ENV ACE_KEYSTORE_PASSWORD=keystorepwd 
 RUN ace_compile_bars.sh
 
 USER root

@@ -1,0 +1,272 @@
+Sending build context to Docker daemon  2.161GB
+Step 1/44 : FROM golang:1.14.2 as builder
+ ---> 2421885b04da
+Step 2/44 : WORKDIR /go/src/github.com/ot4i/ace-docker/
+ ---> Using cache
+ ---> 62bf1bb52e13
+Step 3/44 : ARG IMAGE_REVISION="Not specified"
+ ---> Using cache
+ ---> 1f73e4a1ff28
+Step 4/44 : ARG IMAGE_SOURCE="Not specified"
+ ---> Using cache
+ ---> 252df38a1df3
+Step 5/44 : COPY go.mod .
+ ---> Using cache
+ ---> 5210d5abb1b6
+Step 6/44 : COPY go.sum .
+ ---> Using cache
+ ---> 3ff0a9833b27
+Step 7/44 : RUN go mod download
+ ---> Using cache
+ ---> a32716216d32
+Step 8/44 : COPY cmd/ ./cmd
+ ---> Using cache
+ ---> 8a49597734a2
+Step 9/44 : COPY internal/ ./internal
+ ---> Using cache
+ ---> 02316a49762a
+Step 10/44 : RUN go build -ldflags "-X \"main.ImageCreated=$(date --iso-8601=seconds)\" -X \"main.ImageRevision=$IMAGE_REVISION\" -X \"main.ImageSource=$IMAGE_SOURCE\"" ./cmd/runaceserver/
+ ---> Using cache
+ ---> 88008951cd03
+Step 11/44 : RUN go build ./cmd/chkaceready/
+ ---> Using cache
+ ---> 25992f51b085
+Step 12/44 : RUN go build ./cmd/chkacehealthy/
+ ---> Using cache
+ ---> 167505c2347d
+Step 13/44 : RUN go test -v ./cmd/runaceserver/
+ ---> Using cache
+ ---> e8135d0c2b57
+Step 14/44 : RUN go test -v ./internal/...
+ ---> Using cache
+ ---> 0a877e3755ec
+Step 15/44 : RUN go vet ./cmd/... ./internal/...
+ ---> Using cache
+ ---> 9537f9fa6bdb
+Step 16/44 : ARG ACE_INSTALL=ace-11.0.0.9.tar.gz
+ ---> Using cache
+ ---> 418270f905b3
+Step 17/44 : WORKDIR /opt/ibm
+ ---> Using cache
+ ---> f4114ebbde21
+Step 18/44 : COPY deps/$ACE_INSTALL .
+ ---> Using cache
+ ---> 904b73b0f191
+Step 19/44 : RUN mkdir ace-11
+ ---> Using cache
+ ---> 3e62876388ea
+Step 20/44 : RUN tar -xf $ACE_INSTALL --absolute-names --exclude ace-11.\*/tools --exclude ace-11.\*/server/bin/TADataCollector.sh --exclude ace-11.\*/server/transformationAdvisor/ta-plugin-ace.jar --strip-components 1 --directory /opt/ibm/ace-11
+ ---> Using cache
+ ---> dbe03ce159f4
+Step 21/44 : FROM registry.access.redhat.com/ubi8/ubi-minimal
+ ---> 28095021e526
+Step 22/44 : ENV SUMMARY="Integration Server for App Connect Enterprise"     DESCRIPTION="Integration Server for App Connect Enterprise"     PRODNAME="AppConnectEnterprise"     COMPNAME="IntegrationServer"
+ ---> Running in 26084951e233
+Removing intermediate container 26084951e233
+ ---> c84c7de1d46d
+Step 23/44 : LABEL summary="$SUMMARY"       description="$DESCRIPTION"       io.k8s.description="$DESCRIPTION"       io.k8s.display-name="Integration Server for App Connect Enterprise"       io.openshift.tags="$PRODNAME,$COMPNAME"       com.redhat.component="$PRODNAME-$COMPNAME"       name="$PRODNAME/$COMPNAME"       vendor="IBM"       version="11.0.0.8"       release="1"       license="IBM"       maintainer="Hybrid Integration Platform Cloud"       io.openshift.expose-services=""       usage=""
+ ---> Running in 48f65fb22859
+Removing intermediate container 48f65fb22859
+ ---> f99240ce6096
+Step 24/44 : COPY /licenses/ /licenses/
+ ---> 645e5168a339
+Step 25/44 : RUN mkdir /etc/ACEOpenTracing /opt/ACEOpenTracing /var/log/ACEOpenTracing && chmod 777 /var/log/ACEOpenTracing /etc/ACEOpenTracing
+ ---> Running in 69d61bb52e5c
+Removing intermediate container 69d61bb52e5c
+ ---> 789a0747eb00
+Step 26/44 : COPY deps/OpenTracing/library/* ./opt/ACEOpenTracing/
+ ---> fcfafb94e4ec
+Step 27/44 : COPY deps/OpenTracing/config/* ./etc/ACEOpenTracing/
+ ---> 1fcd43931723
+Step 28/44 : RUN microdnf install --nodocs openssl util-linux unzip python2 && microdnf clean all
+ ---> Running in 62ca6875014c
+[91m
+(microdnf:7): librhsm-WARNING **: 00:27:59.333: Found 0 entitlement certificates
+[0m[91m
+(microdnf:7): librhsm-WARNING **: 00:27:59.339: Found 0 entitlement certificates
+[0m[91m
+(microdnf:7): libdnf-WARNING **: 00:27:59.342: Loading "/etc/dnf/dnf.conf": IniParser: Can't open file
+[0mDownloading metadata...
+Downloading metadata...
+Downloading metadata...
+Package                                                                 Repository          Size
+Installing:                                                                                     
+ cracklib-2.9.6-15.el8.x86_64                                           ubi-8-baseos     95.5 kB
+ cracklib-dicts-2.9.6-15.el8.x86_64                                     ubi-8-baseos      4.1 MB
+ gzip-1.9-9.el8.x86_64                                                  ubi-8-baseos    170.9 kB
+ libfdisk-2.32.1-22.el8.x86_64                                          ubi-8-baseos    254.6 kB
+ libpwquality-1.4.0-9.el8.x86_64                                        ubi-8-baseos    105.0 kB
+ libsemanage-2.9-2.el8.x86_64                                           ubi-8-baseos    168.3 kB
+ libutempter-1.1.6-14.el8.x86_64                                        ubi-8-baseos     32.6 kB
+ openssl-1:1.1.1c-15.el8.x86_64                                         ubi-8-baseos    713.7 kB
+ pam-1.3.1-8.el8.x86_64                                                 ubi-8-baseos    750.5 kB
+ python2-2.7.17-1.module+el8.2.0+4561+f4e0d66a.x86_64                   ubi-8-appstream 111.1 kB
+ python2-libs-2.7.17-1.module+el8.2.0+4561+f4e0d66a.x86_64              ubi-8-appstream   6.2 MB
+ python2-pip-9.0.3-16.module+el8.2.0+5478+b505947e.noarch               ubi-8-appstream   2.0 MB
+ python2-pip-wheel-9.0.3-16.module+el8.2.0+5478+b505947e.noarch         ubi-8-appstream   1.2 MB
+ python2-setuptools-39.0.1-11.module+el8.1.0+3446+c3d52da3.noarch       ubi-8-appstream 658.9 kB
+ python2-setuptools-wheel-39.0.1-11.module+el8.1.0+3446+c3d52da3.noarch ubi-8-appstream 295.8 kB
+ shadow-utils-2:4.6-8.el8.x86_64                                        ubi-8-baseos      1.3 MB
+ unzip-6.0-43.el8.x86_64                                                ubi-8-baseos    199.7 kB
+ util-linux-2.32.1-22.el8.x86_64                                        ubi-8-baseos      2.6 MB
+Transaction Summary:
+ Installing:       18 packages
+ Reinstalling:      0 packages
+ Upgrading:         0 packages
+ Removing:          0 packages
+ Downgrading:       0 packages
+Downloading packages...
+Running transaction test...
+Installing: python2-pip-wheel;9.0.3-16.module+el8.2.0+5478+b505947e;noarch;ubi-8-appstream
+Installing: python2-setuptools-wheel;39.0.1-11.module+el8.1.0+3446+c3d52da3;noarch;ubi-8-appstream
+Installing: python2-setuptools;39.0.1-11.module+el8.1.0+3446+c3d52da3;noarch;ubi-8-appstream
+Installing: python2-pip;9.0.3-16.module+el8.2.0+5478+b505947e;noarch;ubi-8-appstream
+Installing: python2;2.7.17-1.module+el8.2.0+4561+f4e0d66a;x86_64;ubi-8-appstream
+Installing: python2-libs;2.7.17-1.module+el8.2.0+4561+f4e0d66a;x86_64;ubi-8-appstream
+Installing: libfdisk;2.32.1-22.el8;x86_64;ubi-8-baseos
+Installing: libsemanage;2.9-2.el8;x86_64;ubi-8-baseos
+Installing: shadow-utils;2:4.6-8.el8;x86_64;ubi-8-baseos
+Installing: libutempter;1.1.6-14.el8;x86_64;ubi-8-baseos
+Installing: gzip;1.9-9.el8;x86_64;ubi-8-baseos
+Installing: cracklib;2.9.6-15.el8;x86_64;ubi-8-baseos
+Installing: cracklib-dicts;2.9.6-15.el8;x86_64;ubi-8-baseos
+Installing: libpwquality;1.4.0-9.el8;x86_64;ubi-8-baseos
+Installing: pam;1.3.1-8.el8;x86_64;ubi-8-baseos
+Installing: util-linux;2.32.1-22.el8;x86_64;ubi-8-baseos
+Installing: unzip;6.0-43.el8;x86_64;ubi-8-baseos
+Installing: openssl;1:1.1.1c-15.el8;x86_64;ubi-8-baseos
+Complete.
+[91m
+(microdnf:1): librhsm-WARNING **: 00:28:12.057: Found 0 entitlement certificates
+[0m[91m
+(microdnf:1): librhsm-WARNING **: 00:28:12.059: Found 0 entitlement certificates
+[0m[91m
+(microdnf:1): libdnf-WARNING **: 00:28:12.060: Loading "/etc/dnf/dnf.conf": IniParser: Can't open file
+[0mComplete.
+Removing intermediate container 62ca6875014c
+ ---> 5478d9205d8a
+Step 29/44 : WORKDIR /opt/ibm
+ ---> Running in c01ef7cff83b
+Removing intermediate container c01ef7cff83b
+ ---> 71435d417338
+Step 30/44 : RUN microdnf update && microdnf install findutils util-linux unzip python3 && microdnf clean all
+ ---> Running in d10fdb6fe048
+[91m
+(microdnf:8): librhsm-WARNING **: 00:28:14.425: Found 0 entitlement certificates
+[0m[91m
+(microdnf:8): librhsm-WARNING **: 00:28:14.429: Found 0 entitlement certificates
+[0m[91m
+(microdnf:8): libdnf-WARNING **: 00:28:14.430: Loading "/etc/dnf/dnf.conf": IniParser: Can't open file
+[0mDownloading metadata...
+Downloading metadata...
+Downloading metadata...
+Package                          Repository       Size
+Upgrading:                                            
+ openldap-2.4.46-11.el8_1.x86_64 ubi-8-baseos 360.3 kB
+ tzdata-2020d-1.el8.noarch       ubi-8-baseos 482.4 kB
+Transaction Summary:
+ Installing:        0 packages
+ Reinstalling:      0 packages
+ Upgrading:         2 packages
+ Removing:          0 packages
+ Downgrading:       0 packages
+Downloading packages...
+Running transaction test...
+Updating: openldap;2.4.46-11.el8_1;x86_64;ubi-8-baseos
+Updating: tzdata;2020d-1.el8;noarch;ubi-8-baseos
+Cleanup: tzdata;2020a-1.el8;noarch;installed
+Cleanup: openldap;2.4.46-11.el8;x86_64;installed
+Complete.
+[91m
+(microdnf:62): librhsm-WARNING **: 00:28:17.611: Found 0 entitlement certificates
+[0m[91m
+(microdnf:62): librhsm-WARNING **: 00:28:17.613: Found 0 entitlement certificates
+[0m[91m
+(microdnf:62): libdnf-WARNING **: 00:28:17.614: Loading "/etc/dnf/dnf.conf": IniParser: Can't open file
+[0mDownloading metadata...
+Downloading metadata...
+Downloading metadata...
+Package                                               Repository          Size
+Installing:                                                                   
+ findutils-1:4.6.0-20.el8.x86_64                      ubi-8-baseos    540.8 kB
+ platform-python-pip-9.0.3-16.el8.noarch              ubi-8-baseos      1.9 MB
+ python3-pip-9.0.3-16.el8.noarch                      ubi-8-appstream  20.0 kB
+ python3-setuptools-39.2.0-5.el8.noarch               ubi-8-baseos    166.5 kB
+ python36-3.6.8-2.module+el8.1.0+3334+5cb623d7.x86_64 ubi-8-appstream  19.6 kB
+Transaction Summary:
+ Installing:        5 packages
+ Reinstalling:      0 packages
+ Upgrading:         0 packages
+ Removing:          0 packages
+ Downgrading:       0 packages
+Downloading packages...
+Running transaction test...
+Installing: python3-setuptools;39.2.0-5.el8;noarch;ubi-8-baseos
+Installing: platform-python-pip;9.0.3-16.el8;noarch;ubi-8-baseos
+Installing: python36;3.6.8-2.module+el8.1.0+3334+5cb623d7;x86_64;ubi-8-appstream
+Installing: python3-pip;9.0.3-16.el8;noarch;ubi-8-appstream
+Installing: findutils;1:4.6.0-20.el8;x86_64;ubi-8-baseos
+Complete.
+[91m
+(microdnf:1): librhsm-WARNING **: 00:28:20.279: Found 0 entitlement certificates
+[0m[91m
+(microdnf:1): librhsm-WARNING **: 00:28:20.281: Found 0 entitlement certificates
+[0m[91m
+(microdnf:1): libdnf-WARNING **: 00:28:20.281: Loading "/etc/dnf/dnf.conf": IniParser: Can't open file
+[0mComplete.
+Removing intermediate container d10fdb6fe048
+ ---> 366bbb7d7d2c
+Step 31/44 : RUN ln -s /usr/bin/python3 /usr/local/bin/python
+ ---> Running in 8789adff0433
+Removing intermediate container 8789adff0433
+ ---> 347b3c8ea7d5
+Step 32/44 : COPY --from=builder /opt/ibm/ace-11 /opt/ibm/ace-11
+ ---> c0d845b74822
+Step 33/44 : COPY --from=builder /go/src/github.com/ot4i/ace-docker/runaceserver /usr/local/bin/
+ ---> 61f2700ef994
+Step 34/44 : COPY --from=builder /go/src/github.com/ot4i/ace-docker/chkace* /usr/local/bin/
+ ---> 2bf95462bc80
+Step 35/44 : COPY *.sh /usr/local/bin/
+ ---> 9a2e32447a01
+Step 36/44 : COPY ubi/install-kubectl.sh /usr/local/bin/
+ ---> 2b71804aab19
+Step 37/44 : RUN chmod u+x /usr/local/bin/install-kubectl.sh   && install-kubectl.sh
+ ---> Running in ce7636da8bec
+Client Version: version.Info{Major:"1", Minor:"16", GitVersion:"v1.16.0", GitCommit:"2bd9643cee5b3b3a5ecbd3af49d09018f0773c77", GitTreeState:"clean", BuildDate:"2019-09-18T14:36:53Z", GoVersion:"go1.12.9", Compiler:"gc", Platform:"linux/amd64"}
+Removing intermediate container ce7636da8bec
+ ---> 46b6431cc7e4
+Step 38/44 : RUN /opt/ibm/ace-11/ace make registry global accept license silently     && useradd -u 1000 -d /home/aceuser -G mqbrkrs,wheel aceuser     && mkdir -p /var/mqsi     && mkdir -p /home/aceuser/initial-config     && su - -c '. /opt/ibm/ace-11/server/bin/mqsiprofile && mqsicreateworkdir /home/aceuser/ace-server'     && chmod -R 777 /home/aceuser     && chmod -R 777 /var/mqsi
+ ---> Running in 42b93247543a
+License accepted
+Group 'mqbrkrs' will be created
+mqsicreateworkdir: Copying sample server.config.yaml to work directory
+1 file(s) copied.
+Successful command completion.
+Removing intermediate container 42b93247543a
+ ---> 4f5b0b574ce9
+Step 39/44 : ENV BASH_ENV=/usr/local/bin/ace_env.sh
+ ---> Running in cac91f6ec800
+Removing intermediate container cac91f6ec800
+ ---> d6ca026000ed
+Step 40/44 : EXPOSE 7600 7800 7843 9483
+ ---> Running in 2c6f0172a7ad
+Removing intermediate container 2c6f0172a7ad
+ ---> 5fe8570aaa4e
+Step 41/44 : WORKDIR /home/aceuser
+ ---> Running in c2de5b919f7c
+Removing intermediate container c2de5b919f7c
+ ---> 0bac4582180b
+Step 42/44 : ENV LOG_FORMAT=basic
+ ---> Running in 133c7dafedb6
+Removing intermediate container 133c7dafedb6
+ ---> c9872b7155b6
+Step 43/44 : USER aceuser
+ ---> Running in 9f499e7ffdc6
+Removing intermediate container 9f499e7ffdc6
+ ---> 4141b05313ea
+Step 44/44 : ENTRYPOINT ["runaceserver"]
+ ---> Running in 54a502d10608
+Removing intermediate container 54a502d10608
+ ---> 20ef148d746d
+Successfully built 20ef148d746d
+Successfully tagged aceapp3-openssl-base:latest

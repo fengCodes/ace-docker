@@ -86,3 +86,4 @@ All of the applications either just echo back a timestamp, or call another flow 
    Call this from outside the container:
    - Put a message using `MQSAMP_USER_ID=aceuser MQSERVER=ACE.SVRCONN/TCP/localhost(1414) /opt/mqm/samp/bin/amqsputc MULTIIN`, enter the password `passw0rd`, then enter anything for the message text and hit CTRL+D.
    - Get the response using `MQSAMP_USER_ID=aceuser MQSERVER=ACE.SVRCONN/TCP/localhost(1414) /opt/mqm/samp/bin/amqsgetc MULTIOUT QMGR`, and enter the password `passw0rd`.
+# ace-test
