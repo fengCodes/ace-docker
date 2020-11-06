@@ -1,15 +1,16 @@
-FROM aceapp4-base:latest
+FROM aceapp5-base:latest
+
+ARG IMAGE_SOURCE="Not specified"
 
 USER root
 COPY bars_aceonly /home/aceuser/bars
-RUN  chmod -R ugo+rwx /home/aceuser
+RUN  chmod -R ugo+rwx /home/aceuser 
 
 USER aceuser
-ENV ACE_SERVER_NAME=sampleAceOnly
-ENV ACE_SERVER_NAME=sampleAceOnly2
-ENV ACE_TRUSTSTORE_PASSWORD=truststorepwd
-ENV ACE_KEYSTORE_PASSWORD=keystorepwd 
-RUN ace_compile_bars.sh
+# ENV ACE_SERVER_NAME=sampleAceOnly
+# ENV ACE_TRUSTSTORE_PASSWORD=truststorepwd
+# ENV ACE_KEYSTORE_PASSWORD=keystorepwd 
+# RUN ace_compile_bars.sh
 
 USER root
 RUN  chmod -R ugo+rwx /home/aceuser
